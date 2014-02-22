@@ -54,7 +54,7 @@ Great, we’re now ready to use angular-translate’s components to translate ou
 Now our app depends upon angular-translate as installed, and our app declares it as a dependency, so we can use it to translate our app’s contents.
 
 First, we need to provide translation material for our app to actually speak a new language.
-This step actually entails configuring the $translate service through our fresh $translateProvider service.
+This step actually entails configuring the `$translate` service through our fresh `$translateProvider` service.
 
 Training our app to use a new language is simple.
 Using the config function on our app, we provide the different language translations for our app, i.e. English, German, Hebrew, etc..
@@ -67,7 +67,7 @@ angular.module('angularTranslateApp', ['pascalprecht.translate'])
 }]);
 ```
 
-To add a language, we have to make $translateProvider aware of a translation table, which is a JSON object containing our messages (keys) that are to be translated into (values).
+To add a language, we have to make `$translateProvider` aware of a translation table, which is a JSON object containing our messages (keys) that are to be translated into (values).
 Using a translation table enables us to write our translations as simple JSON for loading remotely or setting at compile-time, such as:
 
 ```json
@@ -82,7 +82,7 @@ Now add a translation table to your app.
 
 ```js
 app.config(function ['$translateProvider', ($translateProvider) {
-  $translateProvider.translations({
+  $translateProvider.translations('en', {
     HEADLINE: 'Hello there, This is my awesome app!',
     INTRO_TEXT: 'And it has i18n support!'
   });
@@ -91,6 +91,7 @@ app.config(function ['$translateProvider', ($translateProvider) {
 
 With this translation table in place, our app is set to use angular-translate.
 Since we’re adding the translation table at configuration time, angular-translate’s components are able to access it as soon as they are instantiated.
+`$translateProvider.translations()` expects a language key and the translation table as arguments.
 
 Let’s switch over to our app template.
 Adding translations in the view layer is as simple as binding our key to the view.
@@ -116,24 +117,14 @@ Let’s see angular-translate’s real power and learn how to teach our app more
 ## Multi-language support
 You’ve already learned how to add a translation table to your app using `$translateProvider.translations()`.
 
-The $translateProvider knows one language, as we set it with the `$translateProvider.translations()` method.
+The `$translateProvider` knows one language, as we set it with the `$translateProvider.translations()` method.
 Now, we can add an additional language in the same way by providing a second translation table.
 
-When we set our first translation table, we can provide it a key (a language key) that specifies the language we’re translating.
+When we set our first translation table, we provided it a key (a language key) that specifies the language we’re translating.
 We can simply add another translation key with another language key.
 
-Let’s update our app to include a second language:
 
-```js
-app.config(function ['$translateProvider', ($translateProvider) {
-  $translateProvider.translations('en_US', {
-    HEADLINE: 'Hello there, This is my awesome app!',
-    INTRO_TEXT: 'And it has i18n support!'
-  });
-}]);
-```
-
-To add a second translation table for another language, let’s say German, just do the same with a different language key:
+To add a second translation table for another language, let’s say German, it could look like this:
 
 ```js
 app.config(function ['$translateProvider', ($translateProvider) {
@@ -172,10 +163,20 @@ app.config(function ['$translateProvider', ($translateProvider) {
 }]);
 ```
 
+If you don't want to set the preferred language explicitly, because it should be evaluated depdending on some user settings or so, you can use `$translateProvider.determinePreferredLanguage()`.
+This method tries to determine the preferred language on its own by accessing browser properties.
+You can also pass a custom handler function, that determines the preferred language for you, considering your specific logic.
+
+```js
+$translateProvider.determinePreferredLanguage(function () {
+  // doing some crazy stuff here and returning a language key
+});
+```
+
 ### Switching the language at runtime
 
 To switch to a new language at runtime, we have to use angular-translate’s `$translate` service.
-It has a method `uses()` that either returns the language key of the currently used language, or, when passing a language key as argument, tells angular-translate to use the corresponding language.
+It has a method `use()` that either returns the language key of the currently used language, or, when passing a language key as argument, tells angular-translate to use the corresponding language.
 
 To get a feeling for how this capability works in a real app, add two new translation id’s that represent translations for buttons you’ll add later in your HTML template:
 
@@ -197,13 +198,13 @@ app.config(function ['$translateProvider', ($translateProvider) {
 }]);
 ```
 
-Next, implement a function on a controller that uses the `$translate` service and its `uses()` method to change the language at runtime.
+Next, implement a function on a controller that uses the `$translate` service and its `use()` method to change the language at runtime.
 To do that, we’ll inject the `$translate` service in our app’s controller and add a function on its $scope:
 
 ```js
 app.controller('TranslateCtrl', ['$translate', '$scope', function ($translate, $scope) {
   $scope.changeLanguage = function (langKey) {
-    $translate.uses(langKey);
+    $translate.use(langKey);
   };
 }]);
 ```
@@ -265,6 +266,9 @@ Using the StaticFilesLoader like so gives us the side benefit of lazy-loading.
 
 Of course, using asynchronous loading will cause a flash of untranslated content as the app loads.
 We can circumvent this side effect by setting a default language that is packaged with the app.
+Since angular-translate version `>=2.0.0` there's also a `translate-cloak` directive that helps you out with that problem.
+It adds a class to the element, where the directive is applied, and removes it, once the translation data is loaded.
+With this class you can control some CSS for your app to for example set content modules to `display: none` until language is loaded.
 
 One last cool feature: We can use local storage to store our language files.
 angular-translate provides the ability to use local storage; this capability can be enabled with one function:
@@ -275,7 +279,7 @@ $translateProvider.useLocalStorage();
 
 ## Conclusion
 We’ve covered how to use angular-translate to bring i18n support to your Angular app using `$translateProvider.translations()` and the translate filter.
-We’ve also shown how to change the language at runtime using `$translate` service and its `uses()` method.
+We’ve also shown how to change the language at runtime using `$translate` service and its `use()` method.
 
 Try out angular-translate; it comes with a lot of really nice built-in features, such as handling pluralization, using custom loaders, and setting translations through a service.
 The docs are fantastic; we suggest you check them out here.
